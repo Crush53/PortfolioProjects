@@ -1,7 +1,12 @@
+/*
+Covid 19 Data Exploration 
+Skills used: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+*/
 SELECT *
 FROM covidDeaths c
 Where continent is not null
 order by 3,4 
+
 
 SELECT *
 FROM covidvaccinations 
@@ -31,6 +36,7 @@ Where location like '%states%'
 order by 1,2 
 
 --Looking at countries with Highest Infection Rates compared to population
+
 Select location, date , MAX(total_cases*1.0) as HighestInfectionCount, population , MAX((total_cases *1.0 / population)) *100 as PercentPopulationInfected
 From covidDeaths cd
 --Where location like '%states%'
@@ -38,7 +44,8 @@ GROUP BY location, population
 order by PercentPopulationInfected desc
 
 
--- Showing Countries with Highest Death Count per population 
+-- Showing Countries with Highest Death Count per population
+
 Select location, MAX(cast(total_deaths as int)) as TotalDeathCount
 From covidDeaths cd
 --Where location like '%states%'
@@ -46,6 +53,8 @@ WHERE location NOT IN ('World', 'High income', 'Upper middle income', 'Europe', 
 GROUP BY location
 order by TotalDeathCount DESC
 
+
+-- BREAKING THINGS DOWN BY CONTINENT
 
 -- Showing the continents with the highest death count per population
 
@@ -68,7 +77,8 @@ WHERE continent is not null
 order by 1,2 
 
 
---Looking at Total Population vs Vaccinations
+-- Total Population vs Vaccinations
+-- Shows Percentage of Population that has recieved at least one Covid Vaccine
 
 Select dea.continent , dea.location, dea.date, dea.population, vac.new_vaccinations
 , SUM(vac.new_vaccinations *1.0) OVER (PARTITION by dea.location ORDER by dea.location , 
@@ -84,7 +94,8 @@ order by 1,2
 
 
 
---USE CTE
+-- Using CTE to perform Calculation on Partition By in previous query
+
 With PopvsVAC (continent,location,date,population, new_vaccinations,RollingPeopleVaccinated)
 as(
 Select dea.continent , dea.location, dea.date, dea.population, vac.new_vaccinations
@@ -104,7 +115,7 @@ FROM PopvsVAC
 
 
 
---TEMP TABLE
+-- Using Temp Table to perform Calculation on Partition By in previous query
 
 DROP TABLE IF EXISTS PercentPopulationVaccinated;
 
@@ -135,7 +146,8 @@ SELECT *,
 FROM PercentPopulationVaccinated;
 
 
--- Creating view to store data for later visualizations 
+-- Creating View to store data for later visualizations
+
 DROP VIEW IF EXISTS PercentPopulationVaccinated_new; 
 CREATE VIEW PercentPopulationVaccinated_new (Continent, Location, Date, Population, New_vaccinations, RollingPeopleVaccinated) AS
 SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
